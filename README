@@ -1,0 +1,5 @@
+Basic loop: Access a memory location and then do something before the next memory access.
+            Distance is the stuff that separates these memory accesses.
+With coalescing, several memory accesses are performed at the same time.
+Distance between memory accesses is dominated by cpu cycles for math that is dependent on the memory that was accessed
+
