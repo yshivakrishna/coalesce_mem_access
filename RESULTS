@@ -1,0 +1,68 @@
+Here there are two runs of the program - CASE 1) with no coalescing CASE 2) coalescing 8 memory accesses at the same time.
+Clearly CASE 2 is much faster (2X) than the original.
+
+CASE 1)
+[syerramreddy@localhost coalesce_mem_access]$ g++ -std=c++0x -DNUM_COALESCED=1 -DDISTANCE=32    coalesce_mem_access.cc   -o coalesce_mem_access
+[syerramreddy@localhost coalesce_mem_access]$ sudo ./coalesce_mem_access 
+Num. cpu clocks per cacheline access 464
+[syerramreddy@localhost coalesce_mem_access]$ for i in {1..10}; do sudo ./coalesce_mem_access; done
+Num. cpu clocks per cacheline access 452
+Num. cpu clocks per cacheline access 450
+Num. cpu clocks per cacheline access 490
+Num. cpu clocks per cacheline access 461
+Num. cpu clocks per cacheline access 460
+Num. cpu clocks per cacheline access 465
+Num. cpu clocks per cacheline access 533
+Num. cpu clocks per cacheline access 468
+Num. cpu clocks per cacheline access 493
+Num. cpu clocks per cacheline access 504
+
+CASE 2)
+[syerramreddy@localhost coalesce_mem_access]$ g++ -std=c++0x -DNUM_COALESCED=8 -DDISTANCE=32    coalesce_mem_access.cc   -o coalesce_mem_access
+[syerramreddy@localhost coalesce_mem_access]$ sudo ./coalesce_mem_access 
+Num. cpu clocks per cacheline access 175
+[syerramreddy@localhost coalesce_mem_access]$ for i in {1..10}; do sudo ./coalesce_mem_access; done
+Num. cpu clocks per cacheline access 203
+Num. cpu clocks per cacheline access 168
+Num. cpu clocks per cacheline access 170
+Num. cpu clocks per cacheline access 170
+Num. cpu clocks per cacheline access 172
+Num. cpu clocks per cacheline access 172
+Num. cpu clocks per cacheline access 173
+Num. cpu clocks per cacheline access 174
+Num. cpu clocks per cacheline access 172
+Num. cpu clocks per cacheline access 172
+[syerramreddy@localhost coalesce_mem_access]$
+
+ENVIRONMENT:
+[syerramreddy@localhost coalesce_mem_access]$ uname -r
+3.17.8-200.fc20.x86_64
+[syerramreddy@localhost coalesce_mem_access]$ cat /proc/cpuinfo 
+processor   : 0
+vendor_id   : GenuineIntel
+cpu family  : 6
+model       : 70
+model name  : Intel(R) Core(TM) i7-4750HQ CPU @ 2.00GHz
+stepping    : 1
+microcode   : 0xf
+cpu MHz     : 1994.913
+cache size  : 6144 KB
+physical id : 0
+siblings    : 1
+core id     : 0
+cpu cores   : 1
+apicid      : 0
+initial apicid  : 0
+fpu     : yes
+fpu_exception   : yes
+cpuid level : 13
+wp      : yes
+flags       : fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts mmx fxsr sse sse2 ss syscall nx pdpe1gb rdtscp lm constant_tsc arch_perfmon pebs bts nopl xtopology tsc_reliable nonstop_tsc aperfmperf eagerfpu pni pclmulqdq ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand hypervisor lahf_lm ida arat epb pln pts dtherm fsgsbase smep xsaveopt
+bugs        :
+bogomips    : 3989.82
+clflush size    : 64
+cache_alignment : 64
+address sizes   : 40 bits physical, 48 bits virtual
+power management:
+
+[syerramreddy@localhost coalesce_mem_access]
