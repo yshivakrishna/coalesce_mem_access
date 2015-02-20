@@ -1,3 +1,21 @@
+(Copied from source code)
+/*
+ * GOAL: This program shows that when you have random accesses in a hash table which doesn't fit in cache,
+ * coalescing memory accesses provides significant improvement.
+ *
+ * IMPLEMENTATION:
+ * This program creates a hash table of size far greater than the cache size and accesses random buckets.
+ * Coalescing these accesses shows that the avg. time to access these buckets decreases.
+ * Reason behind that is that coalescing hides the latency of memory accesses(all but 1).
+ *
+ * For more details:
+ * When a memory access misses cacheline, cpu is halted unless the next instructions are independent of this memory access.
+ * Assuming the simple case where cpu is halted, lot of cpu cycles are wasted waiting for one cacheline.
+ * If we can fetch several cachelines in approximately the same number of cpu cycles, that would reduce
+ * a lot of cpu halts. Note that we can't increase the num. coalesced memory accesses infinitely.
+ * The number of coalesced memory accesses is dependent on the number of cpu load buffers (~10 to 40).
+ * Hyperthreading  also has an effect on this.
+ */
 Basic loop: Access a memory location and then do something before the next memory access.
             Distance is the stuff that separates these memory accesses.
 With coalescing, several memory accesses are performed at the same time.
