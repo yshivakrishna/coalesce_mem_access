@@ -46,7 +46,7 @@ static __inline__ ticks getticks(void)
  * The number of coalesced memory accesses is dependent on the number of cpu load buffers (~10 to 40).
  * Hyperthreading  also has an effect on this.
  */
-int main(void)
+int old_main(void)
 {
     if (geteuid()) {
         cout<<"Run as root or sudo user\n";
@@ -104,5 +104,47 @@ int main(void)
     }
     volatile auto t1 = getticks();
     cout<<"Num. cpu clocks per cacheline access "<<(t1 - t0) / NUM_CL_ACCESS<<endl;
+    return 0;
+}
+
+int main(void) {
+    if (geteuid()) {
+        cout<<"Run as root or sudo user\n";
+        exit(-1);
+    }
+    /* mlockall() so that we remove pagefault overhead */
+    int ret =  mlockall(MCL_FUTURE);
+    if (ret)
+        cout<<"mlockall failed with retvalue = "<<ret<<endl;
+
+    volatile uint64_t x = 0;
+#define NUM_INCRS (1000000)
+    volatile auto t0 = getticks();
+        //asm volatile ("inc %0": "+r"(x));
+    while(x < NUM_INCRS) {
+        asm volatile("addq $0x1,-0x20(%rbp)");
+    }
+
+
+    volatile auto t1 = getticks();
+    cout<<"Num. cpu clocks per increment using just addq = "<<(t1 - t0) / NUM_INCRS<<endl;
+    x = 0;
+    t0 = getticks();
+        //asm volatile ("inc %0": "+r"(x));
+    while(x < NUM_INCRS) {
+        asm volatile("addq $0x1,-0x20(%rbp)");
+        asm volatile("mfence":::"memory");
+    }
+
+    t1 = getticks();
+    cout<<"Num. cpu clocks per increment using addq + mfence = "<<(t1 - t0) / NUM_INCRS<<endl;
+    x = 0;
+    t0 = getticks();
+
+    while(x < NUM_INCRS)
+        //asm volatile ("lock add $0x1, %0": "+r"(x));
+        __atomic_add_fetch(&x, 1, __ATOMIC_RELAXED);
+    t1 = getticks();
+    cout<<"Num. cpu clocks per increment with lock add = "<<(t1 - t0) / NUM_INCRS<<endl;
     return 0;
 }
